@@ -25,6 +25,12 @@ module Backup
       attr_accessor :icon_emoji
 
       ##
+      # Include detailed backup log to slack message
+      #
+      # Default: true
+      attr_accessor :include_details
+
+      ##
       # Array of statuses for which the log file should be attached.
       #
       # Available statuses are: `:success`, `:warning` and `:failure`.
@@ -61,8 +67,12 @@ module Backup
       def notify!(status)
         data = {
           text: message.call(model, status: status_data_for(status)),
-          attachments: [attachment(status)]
         }
+
+        if include_details
+          data[:attachments] = [attachment(status)]
+        end
+
         [:channel, :username, :icon_emoji].each do |param|
           val = send(param)
           data.merge!(param => val) if val
